@@ -81,19 +81,19 @@ jobs:
       run: |
         kubectl create ns operators
         kubectl create clusterrolebinding operators --clusterrole cluster-admin --serviceaccount operators:default
-        cd examples
-        cat > Dockerfile <<END
+        cat > $RUNNER_TEMP/Dockerfile <<END
         FROM scratch
         WORKDIR /
         COPY bin/manager /manager
         USER 65532:65532
         ENTRYPOINT ["/manager"]
         END
+        cd examples
         for o in *; do
           cd $o
           mkdir bin
           go build -o bin/manager
-          docker build -t $o-operator:latest -f ../Dockerfile .
+          docker build -t $o-operator:latest -f $RUNNER_TEMP/Dockerfile .
           kind load docker-image $o-operator:latest
           for f in crds/*; do kubectl apply -f $f; done
           kubectl -n operators run $o-operator --image $o-operator:latest --image-pull-policy IfNotPresent
