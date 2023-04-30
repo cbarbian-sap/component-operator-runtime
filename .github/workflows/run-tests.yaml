@@ -45,7 +45,7 @@ jobs:
         go-version-file: 'go.mod'
     - name: Build scaffold
       run: |
-        repository=${{ github.server_url }}/${{ github.repository }}
+        repository=github.com/${{ github.repository }}
         version=$(TZ=UTC git --no-pager show --quiet --abbrev=12 --date='format-local:%Y%m%d%H%M%S' --format="v0.0.0-%cd-%h")
         go build -o bin/scaffold -ldflags "-X \"main.version=$repository $version\"" ./scaffold
         echo "Running 'scaffold --version' ..."
