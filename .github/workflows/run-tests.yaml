@@ -29,6 +29,8 @@ jobs:
         if [[ -s status.out ]]; then
           echo "Generated artifacts are not up-to-date; probably 'make generate' was not run before commiting"
           exit 1
+        else
+          echo "Generated artifacts are up-to-date"
         fi
 
   test-scaffold:
@@ -43,7 +45,9 @@ jobs:
         go-version-file: 'go.mod'
     - name: Build scaffold
       run: |
-        go build -o bin/scaffold -ldflags "-X main.version=$(pwd)" ./scaffold
+        repository=${{ github.server_url }}/${{ github.repository }}
+        version=$(TZ=UTC git --no-pager show --quiet --abbrev=12 --date='format-local:%Y%m%d%H%M%S' --format="v0.0.0-%cd-%h")
+        go build -o bin/scaffold -ldflags "-X \"main.version=$repository $version\"" ./scaffold
         echo "Running 'scaffold --version' ..."
         bin/scaffold --version
     - name: Run scaffold
@@ -60,4 +64,4 @@ jobs:
     - name: Build generated operator
       run: |
         cd $RUNNER_TEMP/src
-        make 
+        make
