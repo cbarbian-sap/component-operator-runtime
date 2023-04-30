@@ -57,9 +57,9 @@ jobs:
           --group-name example.io \
           --group-version v1alpha1 \
           --kind MyComponent \
-          --operator-name example.io \
-          --go-module example.io/mycomponent-manager \
-          --image mycomponent-manager-operator:latest \
+          --operator-name mycomponent-operator.example.io \
+          --go-module example.io/mycomponent-operator \
+          --image mycomponent-operator:latest \
           $RUNNER_TEMP/src
     - name: Build generated operator
       run: |
@@ -74,6 +74,38 @@ jobs:
       uses: helm/kind-action@v1
       with:
         version: v0.18.0
-    - name: Test
+        cluster_name: kind
+    - name: Deploy operators
       run: |
-        kubectl get nodes
+        kubectl create ns operators
+        kubectl create clusterrolebinding operators --clusterrole cluster-admin --serviceaccount operators:default
+        cd examples
+        cat > Dockerfile <<END
+        FROM scratch
+        WORKDIR /
+        COPY bin/manager /manager
+        USER 65532:65532
+        ENTRYPOINT ["/manager"]
+        END
+        for o in *; do
+          cd $o
+          mkdir bin
+          go build -o bin/manager
+          docker build -t $o-operator:latest -f ../Dockerfile .
+          kind load docker-image $o-operator:latest
+          for f in crds/*; do kubectl apply -f $f; done
+          kubectl -n operators run $o-operator --image $o-operator:latest --image-pull-policy IfNotPresent
+          kubectl -n operators wait --for condition=Ready pods/$o-operator
+          cd ..
+        done
+    - name: Deploy test objects
+      run: |
+        kubectl apply -f - <<END
+        apiVersion: example.io/v1alpha1
+        kind: HelmComponent
+        metadata:
+          name: test
+        END
+        kubectl wait --for condition=Ready helmcomponents/test
+
+
