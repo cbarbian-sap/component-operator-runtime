@@ -91,7 +91,6 @@ jobs:
         cd examples
         for o in *; do
           cd $o
-          mkdir bin
           go build -o bin/manager
           docker build -t $o-operator:latest -f $RUNNER_TEMP/Dockerfile .
           kind load docker-image $o-operator:latest
