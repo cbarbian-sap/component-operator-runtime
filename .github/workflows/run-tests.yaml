@@ -97,6 +97,7 @@ jobs:
           kind load docker-image $o-operator:latest
           for f in crds/*; do kubectl apply -f $f; done
           kubectl -n operators run $o-operator --image $o-operator:latest --image-pull-policy IfNotPresent
+          kubectl -n operators logs -f $o-operator
           kubectl -n operators wait --for condition=Ready pods/$o-operator
           cd ..
         done
