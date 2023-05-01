@@ -85,6 +85,7 @@ jobs:
         FROM scratch
         WORKDIR /
         COPY bin/manager /manager
+        USER 65532:65532
         ENTRYPOINT ["/manager"]
         END
         cd examples
@@ -95,6 +96,8 @@ jobs:
           cp $RUNNER_TEMP/Dockerfile .
           docker build -t $o-operator:latest .
           docker history $o-operator:latest
+          docker create --name temp helm-operator:latest
+          docker export temp | tar tv
           docker run --rm $o-operator:latest -h
           kind load docker-image $o-operator:latest
           for f in crds/*; do kubectl apply -f $f; done
