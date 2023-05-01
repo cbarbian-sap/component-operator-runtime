@@ -67,7 +67,7 @@ jobs:
         make
 
   test-sample-operators:
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     needs: check-generate
     steps:
     - name: Checkout
@@ -76,11 +76,14 @@ jobs:
       uses: actions/setup-go@v3
       with:
         go-version-file: 'go.mod'
-    - name: Create Kind Cluster
+    - name: Create Kind cluster
       uses: helm/kind-action@v1
       with:
         version: v0.18.0
         cluster_name: kind
+    - name: Show Kubernetes version
+      run: |
+        kubectl version
     - name: Deploy operators
       run: |
         kubectl create ns operators
