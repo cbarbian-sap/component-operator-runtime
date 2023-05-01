@@ -94,6 +94,7 @@ jobs:
           go build -o bin/manager
           ls -la bin
           cp $RUNNER_TEMP/Dockerfile .
+          docker info
           docker build -t $o-operator:latest .
           docker history $o-operator:latest
           docker create --name temp helm-operator:latest
