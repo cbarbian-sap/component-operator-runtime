@@ -67,7 +67,7 @@ jobs:
         make
 
   test-sample-operators:
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     needs: check-generate
     steps:
     - name: Checkout
