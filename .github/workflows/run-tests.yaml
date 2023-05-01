@@ -92,8 +92,10 @@ jobs:
         for o in *; do
           cd $o
           go build -o bin/manager
+          ls -la bin
           docker build -t $o-operator:latest -f $RUNNER_TEMP/Dockerfile .
           docker history $o-operator:latest
+          docker run --rm $o-operator:latest -h
           kind load docker-image $o-operator:latest
           for f in crds/*; do kubectl apply -f $f; done
           kubectl -n operators run $o-operator --image $o-operator:latest --image-pull-policy IfNotPresent
