@@ -97,9 +97,9 @@ jobs:
           docker info
           docker build -t $o-operator:latest .
           docker history $o-operator:latest
-          docker create --name temp helm-operator:latest
+          docker create --name temp $o-operator:latest
           docker export temp | tar tv
-          docker run --rm $o-operator:latest -h
+          docker run --rm --entrypoint /manager $o-operator:latest -h
           kind load docker-image $o-operator:latest
           for f in crds/*; do kubectl apply -f $f; done
           kubectl -n operators run $o-operator --image $o-operator:latest --image-pull-policy IfNotPresent
