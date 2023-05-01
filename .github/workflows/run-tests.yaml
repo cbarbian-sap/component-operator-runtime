@@ -93,7 +93,8 @@ jobs:
           cd $o
           go build -o bin/manager
           ls -la bin
-          docker build -t $o-operator:latest -f $RUNNER_TEMP/Dockerfile .
+          cp $RUNNER_TEMP/Dockerfile .
+          docker build -t $o-operator:latest .
           docker history $o-operator:latest
           docker run --rm $o-operator:latest -h
           kind load docker-image $o-operator:latest
