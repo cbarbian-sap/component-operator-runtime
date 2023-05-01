@@ -72,6 +72,10 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
+    - name: Setup go
+      uses: actions/setup-go@v3
+      with:
+        go-version-file: 'go.mod'
     - name: Create Kind Cluster
       uses: helm/kind-action@v1
       with:
@@ -84,9 +88,9 @@ jobs:
         cat > $RUNNER_TEMP/Dockerfile <<END
         FROM scratch
         WORKDIR /
-        COPY bin/manager /usr/local/bin/manager
+        COPY bin/manager /manager
         USER 65532:65532
-        ENTRYPOINT ["/usr/local/bin/manager"]
+        ENTRYPOINT ["/manager"]
         END
         cd examples
         for o in *; do
