@@ -95,24 +95,11 @@ jobs:
         cd examples
         for o in *; do
           cd $o
-          go build -o bin/manager
-          ls -la bin
-          cp $RUNNER_TEMP/Dockerfile .
-          cat Dockerfile
-          docker info
-          docker build -t $o-operator:latest .
-          docker history $o-operator:latest
-          docker create --name temp $o-operator:latest
-          docker export temp | tar tv
-          docker run --rm $o-operator:latest -h
+          CGO_ENABLED=0 go build -o bin/manager
+          docker build -t $o-operator:latest -f $RUNNER_TEMP/Dockerfile .
           kind load docker-image $o-operator:latest
           for f in crds/*; do kubectl apply -f $f; done
           kubectl -n operators run $o-operator --image $o-operator:latest --image-pull-policy IfNotPresent
-          for i in 1 2 3 4 5 6 7 8 9 10; do
-            kubectl -n operators get pods
-            sleep 1
-          done
-          kubectl -n operators logs -f $o-operator
           kubectl -n operators wait --for condition=Ready pods/$o-operator
           cd ..
         done
